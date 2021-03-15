@@ -1,3 +1,4 @@
+#include <SPI.h>
 #include "LTC298X.h"
 
 // PRIVATE
@@ -16,14 +17,16 @@ void LTC298X::endTransaction(void) {
 void LTC298X::write8(uint16_t addr, uint8_t data) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_WRITE);
-	SPI.transfer16(addr);
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
 	SPI.transfer(data);
 	this->endTransaction();
 }
 uint8_t LTC298X::read8(uint16_t addr) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_READ);
-	SPI.transfer16(addr);
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
 	uint8_t val = SPI.transfer(0);
 	this->endTransaction();
 	return val;
@@ -31,16 +34,22 @@ uint8_t LTC298X::read8(uint16_t addr) {
 void LTC298X::write24(uint16_t addr, uint32_t data) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_WRITE);
-	SPI.transfer16(addr);
-	SPI.transfer16(data >> 8);
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
+	SPI.transfer(data >> 16);
+	SPI.transfer(data >> 8 & 0xFF);
 	SPI.transfer(data & 0xFF);
 	this->endTransaction();
 }
 uint32_t LTC298X::read24(uint16_t addr) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_READ);
-	SPI.transfer16(addr);
-	uint32_t val = (uint32_t)SPI.transfer16(0) << 8;
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
+	uint32_t val = (uint32_t)SPI.transfer(0);
+	val <<= 8;
+	val |= SPI.transfer(0);
+	val <<= 8;
 	val |= SPI.transfer(0);
 	this->endTransaction();
 	return val;
@@ -48,18 +57,26 @@ uint32_t LTC298X::read24(uint16_t addr) {
 void LTC298X::write32(uint16_t addr, uint32_t data) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_WRITE);
-	SPI.transfer16(addr);
-	SPI.transfer16(data >> 16);
-	SPI.transfer16(data & 0xFFFF);
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
+	SPI.transfer(data >> 24);
+	SPI.transfer(data >> 16 & 0xFF);
+	SPI.transfer(data >> 8 & 0xFF);
+	SPI.transfer(data & 0xFF);
 	this->endTransaction();
 }
 uint32_t LTC298X::read32(uint16_t addr) {
 	this->beginTransaction();
 	SPI.transfer(LTC298X_SPI_READ);
-	SPI.transfer16(addr);
-	uint32_t val = SPI.transfer16(0);
-	val <<= 16;
-	val |= SPI.transfer16(0);
+	SPI.transfer(addr >> 8);
+	SPI.transfer(addr & 0xFF);
+	uint32_t val = (uint32_t)SPI.transfer(0);
+	val <<= 8;
+	val |= SPI.transfer(0);
+	val <<= 8;
+	val |= SPI.transfer(0);
+	val <<= 8;
+	val |= SPI.transfer(0);
 	this->endTransaction();
 	return val;
 }
