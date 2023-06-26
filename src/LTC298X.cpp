@@ -177,7 +177,7 @@ bool LTC298X::setupADC(uint8_t ch, bool single_end) {
 	if (ch < 2 - single_end ||
 	    ch > 20
 	) return false;
-	this->write32(LTC298X_ADDR_CONFIG_CH1 + (ch - 1) * 4, (uint32_t)LTC298X_TYPE_ADC << 27);
+	this->write32(LTC298X_ADDR_CONFIG_CH1 + (ch - 1) * 4, ((uint32_t)LTC298X_TYPE_ADC << 27) + (single_end ? (uint32_t)1 << 26 : 0));
 	return true;
 }
 
